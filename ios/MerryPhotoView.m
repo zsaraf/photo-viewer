@@ -121,6 +121,7 @@
             initWithDataSource:self.dataSource
                   initialPhoto:[self.photos objectAtIndex:initialPhoto]
                       delegate:self];
+
         // hide left bar button
         if (self.hideCloseButton) {
             photosViewController.leftBarButtonItem = nil;
@@ -143,6 +144,12 @@
         }
         // keep a same behavior with Android which trigger an onChange event after first showing up
         [self onNavigateToPhoto:photosViewController Index:initialPhoto];
+        
+        [[photosViewController overlayView] setTitleTextAttributes:@{
+                                                                     NSFontAttributeName: [UIFont fontWithName:@"AvenirNext-Medium" size:18
+                                                                                           ],
+                                                                     NSForegroundColorAttributeName: [UIColor whiteColor]
+                                                                     }];
     });
 }
 
@@ -178,6 +185,24 @@
                 });
             }
         }];
+}
+
+- (void)showShareDialog:(NYTPhotosViewController *)photosViewController
+{
+    if ((photosViewController.currentlyDisplayedPhoto.image || photosViewController.currentlyDisplayedPhoto.imageData)) {
+        UIImage* image = photosViewController.currentlyDisplayedPhoto.image ? photosViewController.currentlyDisplayedPhoto.image : [UIImage imageWithData:photosViewController.currentlyDisplayedPhoto.imageData];
+        NSString *title = [((MerryPhoto *)photosViewController.currentlyDisplayedPhoto).attributedCaptionTitle string];
+        NSString *titleWithAttribution = [[title stringByAppendingString:@"\n"] stringByAppendingString:self.attribution];
+        UIActivityViewController* activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[ image, titleWithAttribution ] applicationActivities:nil];
+        
+        activityViewController.completionWithItemsHandler = ^(NSString* __nullable activityType, BOOL completed, NSArray* __nullable returnedItems, NSError* __nullable activityError) {
+            if (completed && [photosViewController.delegate respondsToSelector:@selector(photosViewController:actionCompletedWithActivityType:)]) {
+                [photosViewController.delegate photosViewController:photosViewController actionCompletedWithActivityType:activityType];
+            }
+        };
+        
+        [self displayActivityViewController:activityViewController animated:YES];
+    }
 }
 
 #pragma mark - NYTPhotosViewControllerDelegate
@@ -253,20 +278,16 @@
 - (BOOL)photosViewController:(NYTPhotosViewController*)photosViewController handleLongPressForPhoto:(id<NYTPhoto>)photo withGestureRecognizer:(UILongPressGestureRecognizer*)longPressGestureRecognizer
 {
 
-    if ((photosViewController.currentlyDisplayedPhoto.image || photosViewController.currentlyDisplayedPhoto.imageData)) {
-        UIImage* image = photosViewController.currentlyDisplayedPhoto.image ? photosViewController.currentlyDisplayedPhoto.image : [UIImage imageWithData:photosViewController.currentlyDisplayedPhoto.imageData];
-        UIActivityViewController* activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[ image ] applicationActivities:nil];
-
-        activityViewController.completionWithItemsHandler = ^(NSString* __nullable activityType, BOOL completed, NSArray* __nullable returnedItems, NSError* __nullable activityError) {
-            if (completed && [photosViewController.delegate respondsToSelector:@selector(photosViewController:actionCompletedWithActivityType:)]) {
-                [photosViewController.delegate photosViewController:photosViewController actionCompletedWithActivityType:activityType];
-            }
-        };
-
-        [self displayActivityViewController:activityViewController animated:YES];
-    }
+    [self showShareDialog:photosViewController];
     return YES;
 }
+
+- (BOOL)photosViewController:(NYTPhotosViewController *)photosViewController handleActionButtonTappedForPhoto:(id<NYTPhoto>)photo
+{
+    [self showShareDialog:photosViewController];
+    return YES;
+}
+
 - (void)photosViewControllerDidDismiss:(NYTPhotosViewController*)photosViewController
 {
 
@@ -287,7 +308,7 @@
         initWithString:caption
             attributes:@{
                 NSForegroundColorAttributeName : color,
-                NSFontAttributeName : [UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                NSFontAttributeName : [UIFont fontWithName:@"AvenirNext-Medium" size:18],
             }];
 }
 
@@ -298,7 +319,7 @@
         initWithString:summary
             attributes:@{
                 NSForegroundColorAttributeName : color,
-                NSFontAttributeName : [UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                NSFontAttributeName : [UIFont fontWithName:@"AvenirNext-Medium" size:16],
             }];
 }
 

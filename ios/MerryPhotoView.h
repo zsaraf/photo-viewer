@@ -8,6 +8,7 @@
 
 #import <NYTPhotoViewer/NYTPhotoViewerArrayDataSource.h>
 #import <NYTPhotoViewer/NYTPhotosViewController.h>
+#import <NYTPhotoViewer/NYTPhotosOverlayView.h>
 
 #import "MerryCommonHeader.h"
 
@@ -24,6 +25,7 @@
 // Define view properties here with @property
 @property (nonatomic) NSInteger initial;
 @property (nonatomic) NSArray* data;
+@property (nonatomic) NSString* attribution;
 @property (nonatomic) BOOL hideStatusBar;
 @property (nonatomic, copy) RCTBubblingEventBlock onDismiss;
 @property (nonatomic, copy) RCTBubblingEventBlock onChange;
