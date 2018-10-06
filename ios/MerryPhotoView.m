@@ -195,6 +195,10 @@
         NSString *titleWithAttribution = [[title stringByAppendingString:@"\n"] stringByAppendingString:self.attribution];
         UIActivityViewController* activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[ image, titleWithAttribution ] applicationActivities:nil];
         
+        if ([activityViewController respondsToSelector:@selector(popoverPresentationController)]) {
+            activityViewController.popoverPresentationController.barButtonItem = photosViewController.overlayView.rightBarButtonItem;
+        }
+        
         activityViewController.completionWithItemsHandler = ^(NSString* __nullable activityType, BOOL completed, NSArray* __nullable returnedItems, NSError* __nullable activityError) {
             if (completed && [photosViewController.delegate respondsToSelector:@selector(photosViewController:actionCompletedWithActivityType:)]) {
                 [photosViewController.delegate photosViewController:photosViewController actionCompletedWithActivityType:activityType];
