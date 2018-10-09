@@ -46,6 +46,17 @@ public class MerryPhotoView extends View {
 
     protected String shareText;
 
+    public String getAttribution() {
+        return attribution;
+    }
+
+    public MerryPhotoView setAttribution(String attribution) {
+        this.attribution= attribution;
+        return this;
+    }
+
+    protected String attribution;
+
 
     protected int initial;
 
@@ -123,6 +134,7 @@ public class MerryPhotoView extends View {
 
         ImageViewer imageViewer = builder.build();
         overlayView.setImageViewer(imageViewer);
+        overlayView.setAttribution(this.attribution);
         imageViewer.show();
     }
 

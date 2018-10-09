@@ -3,16 +3,34 @@ package com.merryjs.PhotoViewer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.facebook.common.references.CloseableReference;
+import com.facebook.datasource.DataSource;
+import com.facebook.datasource.DataSources;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.image.CloseableBitmap;
+import com.facebook.imagepipeline.image.CloseableImage;
+import com.facebook.imagepipeline.request.ImageRequest;
 import com.merryjs.PhotoViewer.R;
 import com.stfalcon.frescoimageviewer.ImageViewer;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 
 /**
@@ -28,6 +46,7 @@ public class MerryPhotoOverlay extends RelativeLayout {
     private TextView tvClose;
     private ImageViewer imageViewer;
     private String sharingText;
+    private String attribution;
     public void setImageViewer(ImageViewer imageViewer){
         this.imageViewer = imageViewer;
     }
@@ -76,6 +95,10 @@ public class MerryPhotoOverlay extends RelativeLayout {
         this.sharingText = text;
     }
 
+    public void setAttribution(String text) {
+        this.attribution = text;
+    }
+
     public void setShareTextColor(String color) {
         tvShare.setTextColor(Color.parseColor(color));
     }
@@ -89,11 +112,54 @@ public class MerryPhotoOverlay extends RelativeLayout {
     }
 
     private void sendShareIntent() {
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, sharingText);
-        sendIntent.setType("text/plain");
-        getContext().startActivity(sendIntent);
+        ImageRequest imageRequest = ImageRequest.fromUri(this.sharingText);
+        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+        DataSource<CloseableReference<CloseableImage>> dataSource =
+                imagePipeline.fetchImageFromBitmapCache(imageRequest, getContext());
+        try {
+            CloseableReference<CloseableImage> result = DataSources.waitForFinalResult(dataSource);
+            if (result != null) {
+                CloseableImage closeableImage = result.get();
+                if (closeableImage instanceof CloseableBitmap) {
+                    // do something with the bitmap
+                    Bitmap bitmap = ((CloseableBitmap)closeableImage).getUnderlyingBitmap();
+                    // save bitmap to cache directory
+                    try {
+
+                        File cachePath = new File(getContext().getCacheDir(), "images");
+                        cachePath.mkdirs(); // don't forget to make the directory
+                        FileOutputStream stream = new FileOutputStream(cachePath + "/image.png"); // overwrites this image every time
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        stream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    File imagePath = new File(getContext().getCacheDir(), "images");
+                    File newFile = new File(imagePath, "image.png");
+                    Uri contentUri = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".provider", newFile);
+
+                    if (contentUri != null) {
+                        Intent shareIntent = new Intent();
+                        shareIntent.setAction(Intent.ACTION_SEND);
+                        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
+                        shareIntent.setDataAndType(contentUri, getContext().getContentResolver().getType(contentUri));
+                        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                        shareIntent.putExtra(Intent.EXTRA_TEXT, tvTitle.getText() + "\n" + this.attribution);
+                        getContext().startActivity(Intent.createChooser(shareIntent, "Choose an app"));
+                    }
+                }
+                Log.d("result", result.toString());
+                // Do something with the image, but do not keep the reference to it!
+                // The image may get recycled as soon as the reference gets closed below.
+                // If you need to keep a reference to the image, read the following sections.
+            }
+        } catch (Throwable t) {
+            Log.d("throwable", t.toString());
+        } finally {
+            dataSource.close();
+        }
+
     }
 
     private void init() {
