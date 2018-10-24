@@ -192,7 +192,7 @@
     if ((photosViewController.currentlyDisplayedPhoto.image || photosViewController.currentlyDisplayedPhoto.imageData)) {
         UIImage* image = photosViewController.currentlyDisplayedPhoto.image ? photosViewController.currentlyDisplayedPhoto.image : [UIImage imageWithData:photosViewController.currentlyDisplayedPhoto.imageData];
         NSString *title = [((MerryPhoto *)photosViewController.currentlyDisplayedPhoto).attributedCaptionTitle string];
-        NSString *titleWithAttribution = [[title stringByAppendingString:@"\n"] stringByAppendingString:self.attribution];
+        NSString *titleWithAttribution = [[title stringByAppendingString:(title.length ? @"\n" : @"")] stringByAppendingString:self.attribution];
         UIActivityViewController* activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[ image, titleWithAttribution ] applicationActivities:nil];
         
         if ([activityViewController respondsToSelector:@selector(popoverPresentationController)]) {
