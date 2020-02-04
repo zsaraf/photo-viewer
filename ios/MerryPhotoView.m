@@ -147,7 +147,7 @@
         [self onNavigateToPhoto:photosViewController Index:initialPhoto];
         
         [[photosViewController overlayView] setTitleTextAttributes:@{
-                                                                     NSFontAttributeName: [UIFont fontWithName:@"AvenirNext-Medium" size:18
+                                                                     NSFontAttributeName: [UIFont systemFontOfSize:18
                                                                                            ],
                                                                      NSForegroundColorAttributeName: [UIColor whiteColor]
                                                                      }];
@@ -313,7 +313,7 @@
         initWithString:caption
             attributes:@{
                 NSForegroundColorAttributeName : color,
-                NSFontAttributeName : [UIFont fontWithName:@"AvenirNext-Medium" size:18],
+                NSFontAttributeName : [UIFont systemFontOfSize:18],
             }];
 }
 
@@ -324,7 +324,7 @@
         initWithString:summary
             attributes:@{
                 NSForegroundColorAttributeName : color,
-                NSFontAttributeName : [UIFont fontWithName:@"AvenirNext-Medium" size:16],
+                NSFontAttributeName : [UIFont systemFontOfSize:16],
             }];
 }
 
