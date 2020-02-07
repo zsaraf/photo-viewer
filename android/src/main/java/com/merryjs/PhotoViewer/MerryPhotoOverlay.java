@@ -183,7 +183,7 @@ public class MerryPhotoOverlay extends RelativeLayout {
         });
 
         Typeface face = Typeface.createFromAsset(this.getContext().getAssets(),
-                "fonts/Lato-Bold.ttf");
+                "fonts/Roboto-Bold.ttf");
         tvTitlePager.setTypeface(face);
         tvTitle.setTypeface(face);
         tvDescription.setTypeface(face);
