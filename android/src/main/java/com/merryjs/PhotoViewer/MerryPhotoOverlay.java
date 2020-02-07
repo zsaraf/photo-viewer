@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
@@ -150,6 +149,10 @@ public class MerryPhotoOverlay extends RelativeLayout {
                         getContext().startActivity(Intent.createChooser(shareIntent, "Choose an app"));
                     }
                 }
+                Log.d("result", result.toString());
+                // Do something with the image, but do not keep the reference to it!
+                // The image may get recycled as soon as the reference gets closed below.
+                // If you need to keep a reference to the image, read the following sections.
             }
         } catch (Throwable t) {
             Log.d("throwable", t.toString());
@@ -181,11 +184,5 @@ public class MerryPhotoOverlay extends RelativeLayout {
                imageViewer.onDismiss();
             }
         });
-
-        Typeface face = Typeface.createFromAsset(this.getContext().getAssets(),
-                "fonts/Lato-Bold.ttf");
-        tvTitlePager.setTypeface(face);
-        tvTitle.setTypeface(face);
-        tvDescription.setTypeface(face);
     }
 }
